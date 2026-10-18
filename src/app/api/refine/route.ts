@@ -56,7 +56,7 @@ export async function POST(req: Request) {
     if (!providerInfo.isConfigured) {
       return new Response(
         JSON.stringify({
-          error: `AI Provider (${providerInfo.providerDisplayName}) is not configured.`,
+          error: `AI Provider (${providerInfo.providerDisplayName}) is not configured. Please add your GEMINI_API_KEY to .env or .env.local.`,
         }),
         { status: 503, headers: { "Content-Type": "application/json" } }
       )

@@ -128,7 +128,7 @@ export default function SettingsPage() {
                   Active Provider
                 </div>
                 <div className="text-sm font-bold text-slate-800 dark:text-slate-200 mt-1 flex items-center gap-2">
-                  {aiProvider.displayName || "OpenAI"}
+                  {aiProvider.displayName || "Google Gemini"}
                   {aiProvider.isConfigured ? (
                     <Badge variant="success" className="text-[10px] py-0">
                       Configured

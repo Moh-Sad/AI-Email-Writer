@@ -11,7 +11,7 @@ export async function GET() {
     let userProfile = null
 
     if (supabaseConfigured) {
-      const supabase = await createClient()
+      const supabase = (await createClient()) as any
       const {
         data: { user },
       } = await supabase.auth.getUser()

@@ -12,19 +12,23 @@ export interface ProviderInfo {
   providerDisplayName: string
 }
 
+function getGeminiApiKey(): string | undefined {
+  return process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY
+}
+
 export function detectActiveProvider(): SupportedProvider {
   const explicit = process.env.AI_PROVIDER?.toLowerCase() as SupportedProvider
   if (explicit && ["openai", "google", "anthropic"].includes(explicit)) {
     return explicit
   }
 
-  // Auto-detect based on available API keys
+  // Auto-detect based on available API keys (prioritizing Gemini if key is provided)
+  if (getGeminiApiKey()) return "google"
   if (process.env.OPENAI_API_KEY) return "openai"
-  if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) return "google"
   if (process.env.ANTHROPIC_API_KEY) return "anthropic"
 
-  // Default to OpenAI
-  return "openai"
+  // Default to Google Gemini
+  return "google"
 }
 
 export function getActiveProviderInfo(): ProviderInfo {
@@ -32,8 +36,8 @@ export function getActiveProviderInfo(): ProviderInfo {
 
   switch (provider) {
     case "google": {
-      const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY
-      const modelName = process.env.GOOGLE_MODEL || "gemini-1.5-flash"
+      const apiKey = getGeminiApiKey()
+      const modelName = process.env.GOOGLE_MODEL || process.env.GEMINI_MODEL || "gemini-1.5-flash"
       return {
         provider: "google",
         modelName,
@@ -72,18 +76,19 @@ export function getAIModel(): { model: LanguageModel; modelName: string; provide
     throw new Error(
       `AI Provider [${info.providerDisplayName}] is not configured. Please add ${
         info.provider === "google"
-          ? "GOOGLE_GENERATIVE_AI_API_KEY"
+          ? "GEMINI_API_KEY (or GOOGLE_GENERATIVE_AI_API_KEY)"
           : info.provider === "anthropic"
           ? "ANTHROPIC_API_KEY"
           : "OPENAI_API_KEY"
-      } to your .env or environment variables.`
+      } to your .env file.`
     )
   }
 
   switch (info.provider) {
     case "google": {
+      const apiKey = getGeminiApiKey()
       const customGoogle = createGoogleGenerativeAI({
-        apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+        apiKey,
       })
       return {
         model: customGoogle(info.modelName) as unknown as LanguageModel,
