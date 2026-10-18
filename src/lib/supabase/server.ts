@@ -1,12 +1,16 @@
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 import { Database } from "@/types/database.types"
-import { isSupabaseConfigured } from "./client"
+import {
+  isSupabaseConfigured,
+  getSupabaseUrl,
+  getSupabasePublishableKey,
+} from "./client"
 
 export async function createClient() {
   const cookieStore = await cookies()
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder-url.supabase.co"
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-anon-key"
+  const url = getSupabaseUrl() || "https://placeholder-url.supabase.co"
+  const anonKey = getSupabasePublishableKey() || "placeholder-anon-key"
 
   return createServerClient<Database>(url, anonKey, {
     cookies: {
@@ -26,4 +30,12 @@ export async function createClient() {
   })
 }
 
-export { isSupabaseConfigured }
+export function getSupabaseSecretKey(): string {
+  return (
+    process.env.SUPABASE_SECRET_KEY ||
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    ""
+  )
+}
+
+export { isSupabaseConfigured, getSupabaseUrl, getSupabasePublishableKey }
